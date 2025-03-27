@@ -30,7 +30,7 @@ pipeline {
         stage('Create Network') {
             steps {
                 script {
-                    // Create a custom Docker network, but check if it already exists first
+                    // Create a custom Docker network if it doesn't already exist
                     sh '''
                     if ! docker network ls --filter name=${DOCKER_NETWORK} -q; then
                         echo "Creating Docker network ${DOCKER_NETWORK}"
