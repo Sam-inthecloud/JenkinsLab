@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_IMAGE = 'sam-image' 
-        DOCKER_NETWORK = 'sam_network'
+        DOCKER_NETWORK = 'my_custom_network'
         TRIVY_REPORT = 'trivy-report.json'  // File name for the Trivy output
     }
     stages {
