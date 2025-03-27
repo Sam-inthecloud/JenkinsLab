@@ -44,6 +44,15 @@ pipeline {
             }
         }
 
+        stage('Run Unit Tests') {
+            steps {
+                script {
+                    // Run the unit tests inside the running container
+                    sh "docker exec ${DOCKER_IMAGE}-container python3 test_app.py"
+                }
+            }
+        }
+
         stage('Run Trivy Scan') {
             steps {
                 script {
