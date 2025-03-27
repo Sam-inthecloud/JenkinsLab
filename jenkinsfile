@@ -1,8 +1,9 @@
 pipeline {
     agent any
     environment {
-        DOCKER_IMAGE = 'your-image-name' // Specify the image name here
-        DOCKER_NETWORK = 'my_custom_network'
+        DOCKER_IMAGE = 'sam-image' 
+        DOCKER_NETWORK = 'sam_network'
+        TRIVY_REPORT = 'trivy-report.json'  // File name for the Trivy output
     }
     stages {
         stage('Prepare Environment') {
@@ -39,6 +40,24 @@ pipeline {
                 script {
                     // Run the Docker container on the created network
                     sh "docker run -d --name ${DOCKER_IMAGE}-container --network ${DOCKER_NETWORK} ${DOCKER_IMAGE}"
+                }
+            }
+        }
+
+        stage('Run Trivy Scan') {
+            steps {
+                script {
+                    // Run the Trivy scan on the Docker image and save the output
+                    sh "trivy image --format json --output ${TRIVY_REPORT} ${DOCKER_IMAGE}"
+                }
+            }
+        }
+
+        stage('Archive Trivy Report') {
+            steps {
+                script {
+                    // Archive the Trivy report as a build artifact
+                    archiveArtifacts artifacts: "${TRIVY_REPORT}", allowEmptyArchive: true
                 }
             }
         }
