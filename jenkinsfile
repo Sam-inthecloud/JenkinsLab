@@ -10,9 +10,19 @@ pipeline {
             steps {
                 script {
                     // Clean up any existing Docker containers or networks if necessary
-                    sh "docker network rm ${DOCKER_NETWORK} || true" // Remove network if exists
-                    sh "docker rm -f ${DOCKER_IMAGE}-container || true" // Remove existing container
-                    sh "docker rmi ${DOCKER_IMAGE} || true" // Remove image if exists
+                    sh '''
+                    # Check if network exists and has active endpoints before removing
+                    if docker network ls --filter name=${DOCKER_NETWORK} -q; then
+                        echo "Removing existing network ${DOCKER_NETWORK}"
+                        docker network rm ${DOCKER_NETWORK} || true
+                    fi
+                    
+                    # Remove existing container
+                    docker rm -f ${DOCKER_IMAGE}-container || true
+                    
+                    # Remove existing image
+                    docker rmi ${DOCKER_IMAGE} || true
+                    '''
                 }
             }
         }
@@ -20,8 +30,15 @@ pipeline {
         stage('Create Network') {
             steps {
                 script {
-                    // Create a custom Docker network
-                    sh "docker network create ${DOCKER_NETWORK}"
+                    // Create a custom Docker network, but check if it already exists first
+                    sh '''
+                    if ! docker network ls --filter name=${DOCKER_NETWORK} -q; then
+                        echo "Creating Docker network ${DOCKER_NETWORK}"
+                        docker network create ${DOCKER_NETWORK}
+                    else
+                        echo "Network ${DOCKER_NETWORK} already exists."
+                    fi
+                    '''
                 }
             }
         }
