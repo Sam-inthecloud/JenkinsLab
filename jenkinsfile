@@ -52,11 +52,20 @@ pipeline {
             }
         }
 
+        stage('Verify Network Exists') {
+            steps {
+                script {
+                    // Verify the network exists before proceeding
+                    sh "docker network ls --filter name=${DOCKER_NETWORK} -q || exit 1"
+                }
+            }
+        }
+
         stage('Run Docker Container') {
             steps {
                 script {
                     // Run the Docker container on the created network
-                    sh "docker run -d --name ${DOCKER_IMAGE}-container --network ${DOCKER_NETWORK} ${DOCKER_IMAGE}"
+                    sh "docker run -d --name ${DOCKER_IMAGE}-container --network ${DOCKER_NETWORK} ${DOCKER_IMAGE} || exit 1"
                 }
             }
         }
